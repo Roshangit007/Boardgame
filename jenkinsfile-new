@@ -1,0 +1,37 @@
+pipeline {
+    agent {label 'agent-1'}
+    
+tools {
+    jdk 'jdk17'
+    maven 'maven3.6'
+}
+
+parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Enter your name')
+        choice choices: ['dev', 'qa', 'prod'], description: 'Envirnment name', name: 'ENV'
+        booleanParam description: 'RUN TEST CASES', name: 'RUN_TEST'
+}
+    stages {
+        stage('git checkout') {
+            steps {
+                git branch: "${params.BRANCH_NAME}", url: 'https://github.com/Roshangit007/Boardgame.git'
+            }
+        }
+        
+        stage('TEST') {
+                when {
+                    expression { params.RUN_TEST }
+                }    
+        steps {
+                sh 'mvn test'
+                }
+            }
+        
+        stage('build') {
+            steps {
+                echo 'build stage'
+                sh 'mvn package'
+            }
+        }
+    }
+}
